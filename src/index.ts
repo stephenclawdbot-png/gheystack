@@ -15,6 +15,8 @@ export { PaymentGateway } from "./payments/gateway.js";
 export { AgentPayments } from "./payments/manager.js";
 export { Marketplace, marketplace } from "./payments/marketplace.js";
 export { Seller, createSeller } from "./payments/seller.js";
+export { CrossChainRouter, CHAIN_INFO, findCheapestChain, findFastestChain, compareChains } from "./payments/crosschain-router.js";
+export type { ChainName, RoutingStrategy, RouteQuote, CrossChainPaymentResult } from "./payments/crosschain-router.js";
 
 // Mesh Protocol — autonomous agent-to-agent commerce
 export { MeshNode } from "./mesh/index.js";
