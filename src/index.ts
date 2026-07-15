@@ -26,5 +26,7 @@ export { TaskMarket } from "./mesh/task-market.js";
 export { MeshProtocol } from "./mesh/protocol.js";
 export { SupplyChainEngine, linearPipeline, fanOutFanIn, dag } from "./mesh/supply-chain.js";
 export { IntentRouter } from "./mesh/intents.js";
+export { planSupplyChainFromNL, planAndApprove } from "./mesh/nl-planner.js";
+export type { NLPlanConfig, NLPlanResult } from "./mesh/nl-planner.js";
 export type * from "./mesh/types.js";
 export type * from "./core/types.js";
