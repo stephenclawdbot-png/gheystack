@@ -1,0 +1,10 @@
+{
+  "name": "ovengi-bot",
+  "type": "module",
+  "scripts": {
+    "start": "gheystack run ./agent --channel telegram"
+  },
+  "dependencies": {
+    "gheystack": "latest"
+  }
+}

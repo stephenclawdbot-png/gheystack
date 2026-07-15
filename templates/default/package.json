@@ -1,0 +1,10 @@
+{
+  "name": "my-gheystack-agent",
+  "type": "module",
+  "scripts": {
+    "start": "gheystack run ./agent"
+  },
+  "dependencies": {
+    "gheystack": "latest"
+  }
+}
