@@ -151,6 +151,133 @@ Off-chain bidirectional channels (like Lightning for USDC):
 
 See [docs/mesh.md](docs/mesh.md) for full protocol documentation.
 
+## Supply Chain Composition
+
+Agents automatically decompose complex tasks into subtask DAGs, hire
+sub-agents via the mesh, orchestrate parallel/sequential execution, and
+aggregate results.
+
+```typescript
+import { MeshNode, linearPipeline, fanOutFanIn } from "gheystack";
+
+// Linear pipeline: A → B → C
+const plan = linearPipeline([
+  { label: "fetch_data", capability: "data.extract", budget: 0.50 },
+  { label: "clean_data", capability: "data.transform", budget: 0.30 },
+  { label: "analyze", capability: "data.analyze", budget: 1.00 },
+]);
+
+// Fan-out/fan-in: parallel processing + aggregation
+const plan2 = fanOutFanIn(
+  [
+    { label: "scan_a", capability: "security.scan", input: { target: "module_a" }, budget: 1.00 },
+    { label: "scan_b", capability: "security.scan", input: { target: "module_b" }, budget: 1.00 },
+    { label: "scan_c", capability: "security.scan", input: { target: "module_c" }, budget: 1.00 },
+  ],
+  { label: "compile_report", capability: "text.summarize", budget: 0.50 },
+  "merge"
+);
+
+// Execute through the mesh
+const result = await node.executeSupplyChain({
+  rootRequest: "Security audit of all modules",
+  plan,
+  totalBudget: 5.0,
+});
+```
+
+## Intent-Based Payment Routing
+
+A new payment primitive: agents express *intents* ("pay up to X USDC for Y result")
+and the protocol auto-matches with capable agents. Like an order book for AI services.
+
+```typescript
+// Create an intent: "I'll pay up to 2 USDC for a Japanese translation"
+const intent = await node.createIntent({
+  type: "range",
+  capability: "text.translate",
+  input: { text: "Hello world", targetLang: "ja" },
+  minAmount: 0.50,
+  maxAmount: 2.00,
+  deadline: Date.now() + 3600_000,
+  minReputation: 30,
+});
+
+// Another agent claims and fulfills it
+await node.claimIntent(intent.id, { quotedPrice: 1.20 });
+await node.fulfillIntent(intent.id, { translated: "こんにちは世界" });
+```
+
+## Natural Language Supply Chain Planner
+
+Describe what you want in plain English — the LLM decomposes it into a
+multi-agent supply chain automatically.
+
+```typescript
+import { planSupplyChainFromNL } from "gheystack";
+
+const result = await planSupplyChainFromNL(
+  "Analyze this GitHub repo for security vulnerabilities and generate a fix PR",
+  { model: "groq/llama-3.3-70b-versatile", maxBudget: 5.0 }
+);
+
+console.log(result.reasoning);
+console.log(result.estimatedCost);  // 4.50 USDC
+// result.plan → DecompositionPlan with DAG of subtasks
+```
+
+## Cross-Chain Payment Router
+
+Agents can pay each other across Base, Ethereum, Polygon, and Arbitrum.
+The router finds the optimal path (lowest cost, fastest, or most liquid).
+
+```typescript
+import { CrossChainRouter } from "gheystack";
+
+const router = new CrossChainRouter(privateKey, "lowest_cost");
+await router.init(["base", "arbitrum"]);
+
+// Quote a cross-chain payment
+const quote = await router.quoteRoute("base", "arbitrum", 5e6);
+console.log(quote.totalCost, quote.estimatedTimeSeconds);
+
+// Execute
+const result = await router.executePayment("base", "arbitrum", recipient, 5e6);
+```
+
+## Agent Economy Simulator
+
+Prove the mesh economy works. Spawn agents with budgets, inject tasks,
+and watch them trade, form supply chains, and build reputation.
+
+```typescript
+import { EconomySimulator } from "gheystack";
+
+const sim = new EconomySimulator();
+await sim.spawn({ count: 20, budget: 100e6 });
+
+sim.injectSupplyChain("audit and fix", ["security.scan", "code.generate", "code.git"], 15e6);
+
+const stats = await sim.run({
+  agentCount: 20,
+  startingBudget: 100e6,
+  taskInjectionRate: 2,
+  durationMs: 30000,
+  capabilities: ["code.analyze", "security.scan", "text.translate"],
+});
+
+console.log(stats.totalVolumeUsdc, stats.giniCoefficient);
+```
+
+## On-Chain Contracts (Solidity)
+
+| Contract | Description |
+|----------|-----------|
+| `AgentRegistry.sol` | Stake USDC, earn reputation, slashable bonds |
+| `PaymentChannel.sol` | Off-chain channels with on-chain dispute resolution (EIP-712) |
+| `AgentEscrow.sol` | Trustless milestone escrow with arbiter disputes |
+| `StackMesh.sol` | Unified contract combining all three for gas efficiency |
+
 ## CLI
 
 ```bash
@@ -184,10 +311,16 @@ gheystack marketplace list   # Browse agent services
 ├──────────────────────────────────────────────────┤
 │                Payment Rails                       │
 │  Wallet │ x402 │ Settlement │ Gateway │ Marketplace │
+│  CrossChain Router (CCTP, 4 chains)                │
 ├──────────────────────────────────────────────────┤
 │               Mesh Protocol                        │
 │  Identity │ Registry │ Channels │ Escrow │ Tasks   │
+│  Supply Chain │ Intent Router │ NL Planner         │
 │  Discovery → RFQ → Quote → Accept → Execute → Pay │
+├──────────────────────────────────────────────────┤
+│            On-Chain Contracts (Solidity)           │
+│  AgentRegistry │ PaymentChannel │ AgentEscrow      │
+│  StackMesh (unified)                               │
 ├──────────────────────────────────────────────────┤
 │                  Providers                         │
 │         Groq  │  OpenAI  │  Anthropic              │
@@ -222,12 +355,15 @@ gheystack marketplace list   # Browse agent services
 - [x] **Mesh protocol: autonomous task market**
 - [x] **Mesh protocol: P2P negotiation (RFQ → Quote → Accept → Settle)**
 - [x] **MeshNode: unified agent commerce node**
-- [ ] On-chain channel contract (Solidity)
-- [ ] On-chain registry contract (Solidity)
-- [ ] On-chain escrow contract (Solidity)
+- [x] **On-chain Solidity contracts: AgentRegistry, PaymentChannel, AgentEscrow, StackMesh**
+- [x] **Supply chain composition: DAG decomposition + autonomous execution**
+- [x] **Intent-based payment routing: 6 intent types with auto-matching**
+- [x] **Natural language supply chain planner: LLM-powered task decomposition**
+- [x] **Cross-chain USDC payment router: CCTP bridging across 4 chains**
+- [x] **Agent economy simulator: prove the mesh economy works end-to-end**
 - [ ] Discord channel
 - [ ] Web UI dashboard
-- [ ] Agent-to-agent supply chain composition
+- [ ] Agent SDK for simplified integration
 
 ## License
 
