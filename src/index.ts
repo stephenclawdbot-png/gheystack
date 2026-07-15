@@ -15,4 +15,14 @@ export { PaymentGateway } from "./payments/gateway.js";
 export { AgentPayments } from "./payments/manager.js";
 export { Marketplace, marketplace } from "./payments/marketplace.js";
 export { Seller, createSeller } from "./payments/seller.js";
+
+// Mesh Protocol — autonomous agent-to-agent commerce
+export { MeshNode } from "./mesh/index.js";
+export { AgentIdentityManager } from "./mesh/identity.js";
+export { AgentRegistry } from "./mesh/registry.js";
+export { PaymentChannelManager } from "./mesh/channels.js";
+export { EscrowService } from "./mesh/escrow.js";
+export { TaskMarket } from "./mesh/task-market.js";
+export { MeshProtocol } from "./mesh/protocol.js";
+export type * from "./mesh/types.js";
 export type * from "./core/types.js";
