@@ -24,5 +24,7 @@ export { PaymentChannelManager } from "./mesh/channels.js";
 export { EscrowService } from "./mesh/escrow.js";
 export { TaskMarket } from "./mesh/task-market.js";
 export { MeshProtocol } from "./mesh/protocol.js";
+export { SupplyChainEngine, linearPipeline, fanOutFanIn, dag } from "./mesh/supply-chain.js";
+export { IntentRouter } from "./mesh/intents.js";
 export type * from "./mesh/types.js";
 export type * from "./core/types.js";

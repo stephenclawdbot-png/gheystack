@@ -258,3 +258,148 @@ export interface MeshNode {
   knownAgents: Map<string, RegistryEntry>;
   reputationLog: ReputationUpdate[];
 }
+
+// ─── Supply Chain ─────────────────────────────────────────────
+
+export type SupplyChainNodeStatus =
+  | "pending"
+  | "ready"
+  | "hiring"
+  | "executing"
+  | "reviewing"
+  | "completed"
+  | "failed"
+  | "skipped";
+
+export interface SupplyChainNode {
+  nodeId: string;
+  label: string;
+  capability: string;
+  input: unknown;
+  budget: number;
+  dependsOn: string[];
+  mergeInputs: boolean;
+  allowSubDecomposition: boolean;
+  maxDepth: number;
+  taskId?: string;
+  hiredAgent?: `0x${string}`;
+  result?: unknown;
+  status: SupplyChainNodeStatus;
+  error?: string;
+  actualPrice?: number;
+}
+
+export type SupplyChainStatus =
+  | "planning"
+  | "executing"
+  | "aggregating"
+  | "completed"
+  | "failed"
+  | "aborted";
+
+export type AggregationStrategy =
+  | "last"
+  | "merge"
+  | "concat"
+  | "custom"
+  | "first";
+
+export interface SupplyChain {
+  id: string;
+  rootRequest: string;
+  totalBudget: number;
+  nodes: Map<string, SupplyChainNode>;
+  terminalNodes: string[];
+  aggregationStrategy: AggregationStrategy;
+  status: SupplyChainStatus;
+  createdAt: number;
+  startedAt?: number;
+  completedAt?: number;
+  totalSpent: number;
+  depth: number;
+  parentNodeId?: string;
+  result?: unknown;
+}
+
+export interface DecompositionPlan {
+  nodes: Array<{
+    label: string;
+    capability: string;
+    input: unknown;
+    budget: number;
+    dependsOn: string[];
+    mergeInputs: boolean;
+    allowSubDecomposition: boolean;
+    maxDepth: number;
+  }>;
+  terminalNodes: string[];
+  aggregationStrategy: AggregationStrategy;
+}
+
+// ─── Payment Intents ──────────────────────────────────────────
+
+export type IntentType = "fixed" | "range" | "bounty" | "streaming" | "conditional" | "recurring";
+
+export type IntentStatus =
+  | "open"
+  | "claimed"
+  | "fulfilled"
+  | "expired"
+  | "cancelled"
+  | "disputed";
+
+export interface PaymentIntent {
+  id: string;
+  type: IntentType;
+  creator: `0x${string}`;
+  capability: string;
+  input: unknown;
+  amount?: number;
+  minAmount?: number;
+  maxAmount?: number;
+  rate?: number;
+  unit?: string;
+  intervalSeconds?: number;
+  verifier?: string;
+  deadline: number;
+  minReputation?: number;
+  allowPartial?: boolean;
+  maxClaims?: number;
+  claimsCount: number;
+  status: IntentStatus;
+  createdAt: number;
+  channelRoute?: string;
+  escrowId?: string;
+  metadata?: Record<string, unknown>;
+}
+
+export type ClaimStatus =
+  | "pending"
+  | "accepted"
+  | "submitted"
+  | "verified"
+  | "paid"
+  | "rejected"
+  | "expired";
+
+export interface IntentClaim {
+  id: string;
+  intentId: string;
+  claimant: `0x${string}`;
+  quotedPrice?: number;
+  estimatedTime?: number;
+  status: ClaimStatus;
+  result?: unknown;
+  verified?: boolean;
+  claimedAt: number;
+  fulfilledAt?: number;
+  paymentTxHash?: string;
+  paidAmount?: number;
+}
+
+export interface IntentMatch {
+  intent: PaymentIntent;
+  claim: IntentClaim;
+  score: number;
+  reason: string;
+}

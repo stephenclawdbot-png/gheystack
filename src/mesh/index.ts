@@ -41,6 +41,8 @@ import { PaymentChannelManager } from "./channels.js";
 import { EscrowService } from "./escrow.js";
 import { TaskMarket } from "./task-market.js";
 import { MeshProtocol } from "./protocol.js";
+import { SupplyChainEngine } from "./supply-chain.js";
+import { IntentRouter } from "./intents.js";
 import type {
   AgentIdentity,
   RegistryEntry,
@@ -49,6 +51,9 @@ import type {
   SignedMessage,
   MeshMessage,
   PaymentChannel,
+  SupplyChain,
+  DecompositionPlan,
+  PaymentIntent,
 } from "./types.js";
 
 export interface MeshNodeConfig {
@@ -80,6 +85,8 @@ export class MeshNode {
   escrow: EscrowService;
   market: TaskMarket;
   protocol: MeshProtocol;
+  supplyChain: SupplyChainEngine;
+  intents: IntentRouter;
 
   private constructor(
     identity: AgentIdentityManager,
@@ -88,7 +95,9 @@ export class MeshNode {
     channels: PaymentChannelManager,
     escrow: EscrowService,
     market: TaskMarket,
-    protocol: MeshProtocol
+    protocol: MeshProtocol,
+    supplyChain: SupplyChainEngine,
+    intents: IntentRouter
   ) {
     this.identity = identity;
     this.wallet = wallet;
@@ -97,6 +106,8 @@ export class MeshNode {
     this.escrow = escrow;
     this.market = market;
     this.protocol = protocol;
+    this.supplyChain = supplyChain;
+    this.intents = intents;
   }
 
   /**
@@ -147,7 +158,13 @@ export class MeshNode {
       channelThreshold: config.channelThreshold,
     });
 
-    const node = new MeshNode(identity, wallet, registry, channels, escrow, market, protocol);
+    // 8. Create supply chain engine
+    const supplyChain = new SupplyChainEngine(identity, protocol, market, escrow, registry);
+
+    // 9. Create intent router
+    const intents = new IntentRouter(identity, channels, registry);
+
+    const node = new MeshNode(identity, wallet, registry, channels, escrow, market, protocol, supplyChain, intents);
 
     // 8. Register in the mesh
     await registry.register(config.stake);
@@ -266,6 +283,95 @@ export class MeshNode {
     return this.protocol.status();
   }
 
+  // ─── Supply Chain ───────────────────────────────────────────
+
+  /**
+   * Execute a complex request by decomposing it into a supply chain.
+   * The chain automatically hires sub-agents, orchestrates execution,
+   * aggregates results, and settles payments.
+   */
+  async executeSupplyChain(
+    request: string,
+    plan: DecompositionPlan,
+    budget: number
+  ): Promise<SupplyChain> {
+    return this.supplyChain.execute(request, plan, budget);
+  }
+
+  /** Get active supply chains */
+  getActiveChains(): SupplyChain[] {
+    return this.supplyChain.getActiveChains();
+  }
+
+  /** Get a specific supply chain by ID */
+  getSupplyChain(chainId: string): SupplyChain | undefined {
+    return this.supplyChain.getChain(chainId);
+  }
+
+  /** Abort a supply chain */
+  abortSupplyChain(chainId: string): void {
+    this.supplyChain.abortChain(chainId);
+  }
+
+  /** Supply chain statistics */
+  supplyChainStats() {
+    return this.supplyChain.getStats();
+  }
+
+  // ─── Intent Router ───────────────────────────────────────────
+
+  /**
+   * Create a payment intent — express willingness to pay for a result.
+   * The mesh auto-matches intents with capable agents.
+   */
+  createIntent(params: {
+    type: "fixed" | "range" | "bounty" | "streaming" | "conditional" | "recurring";
+    capability: string;
+    input: unknown;
+    amount?: number;
+    minAmount?: number;
+    maxAmount?: number;
+    rate?: number;
+    unit?: string;
+    intervalSeconds?: number;
+    verifier?: string;
+    deadlineMs?: number;
+    minReputation?: number;
+    maxClaims?: number;
+  }): PaymentIntent {
+    return this.intents.create(params);
+  }
+
+  /** Find open intents matching a capability (for workers) */
+  findIntents(capability: string, maxPrice?: number): PaymentIntent[] {
+    return this.intents.findMatchingIntents(capability, maxPrice);
+  }
+
+  /** Claim an intent (as a worker) */
+  claimIntent(intentId: string, quotedPrice?: number, estimatedTime?: number) {
+    return this.intents.claim(intentId, this.identity.address, quotedPrice, estimatedTime);
+  }
+
+  /** Submit result for a claimed intent */
+  async fulfillIntent(claimId: string, result: unknown) {
+    return this.intents.submitResult(claimId, result);
+  }
+
+  /** Register a verification function for conditional intents */
+  registerVerifier(name: string, fn: (result: unknown, input: unknown) => boolean): void {
+    this.intents.registerVerifier(name, fn);
+  }
+
+  /** Auto-match the best agent for an open intent */
+  autoMatchIntent(intentId: string) {
+    return this.intents.autoMatch(intentId);
+  }
+
+  /** Intent router statistics */
+  intentStats() {
+    return this.intents.getStats();
+  }
+
   /** Get this agent's identity */
   getIdentity(): AgentIdentity {
     return this.identity.getIdentity();
@@ -289,6 +395,7 @@ export class MeshNode {
   /** Shutdown — stop timers and save state */
   shutdown(): void {
     this.escrow.stopExpiryChecker();
+    this.intents.stop();
     console.log(`[mesh] Node ${this.identity.getIdentity().name} shut down`);
   }
 }
