@@ -46,7 +46,7 @@ export async function loadAgent(agentDir: string): Promise<LoadedAgent> {
   const schedules = await loadSchedules(join(agentDir, "schedules"));
 
   // 6. Load skills from skills/ directory (markdown procedures)
-  const skills = loadSkills(join(agentDir, "skills"));
+  const skills = await loadSkills(join(agentDir, "skills"));
 
   return { config, systemPrompt, tools, channels, schedules, skills };
 }
@@ -66,7 +66,7 @@ async function loadConfig(agentDir: string): Promise<AgentConfig> {
   }
   if (existsSync(tsPath)) {
     // In dev mode, try to load .ts via tsx/esbuild
-    console.warn(`[gheystack] agent.ts found but requires compilation. Using default config.`);
+    console.warn(`[stack] agent.ts found but requires compilation. Using default config.`);
   }
 
   return { model: "groq/llama-3.3-70b-versatile", maxTokens: 500, temperature: 0.9, topP: 0.95 };
@@ -92,11 +92,11 @@ async function loadTools(toolsDir: string): Promise<Map<string, ToolDef>> {
     try {
       const mod = await import(`file://${fullPath}`);
       const tool: ToolDef = mod.default ?? mod;
-      if (tool.name && tool.execute) {
+      if (tool.name && typeof tool.execute === "function") {
         tools.set(tool.name, tool);
       }
     } catch (e) {
-      console.warn(`[gheystack] Failed to load tool ${file}: ${e}`);
+      console.warn(`[stack] Failed to load tool ${file}: ${e}`);
     }
   }
 
@@ -120,7 +120,7 @@ async function loadChannels(channelsDir: string): Promise<Map<string, ChannelDef
         channels.set(channel.name, channel);
       }
     } catch (e) {
-      console.warn(`[gheystack] Failed to load channel ${file}: ${e}`);
+      console.warn(`[stack] Failed to load channel ${file}: ${e}`);
     }
   }
 
@@ -144,7 +144,7 @@ async function loadSchedules(schedulesDir: string): Promise<ScheduleDef[]> {
         schedules.push(schedule);
       }
     } catch (e) {
-      console.warn(`[gheystack] Failed to load schedule ${file}: ${e}`);
+      console.warn(`[stack] Failed to load schedule ${file}: ${e}`);
     }
   }
 

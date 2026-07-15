@@ -94,7 +94,7 @@ export class x402Batcher {
     if (this.payments.length === 0) return "nothing to settle";
 
     const total = this.payments.reduce((sum, p) => sum + p.amount, 0);
-    console.log(`[gheystack] Settling ${this.payments.length} payments totaling ${total} USDC`);
+    console.log(`[stack] Settling ${this.payments.length} payments totaling ${total} USDC`);
 
     const txHash = await this.wallet.send(this.sellerAddress, total);
     this.payments = []; // Clear queue

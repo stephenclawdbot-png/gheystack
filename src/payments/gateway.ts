@@ -5,7 +5,7 @@
  * After payment, verifies on-chain and serves the response.
  *
  * Usage:
- *   import { PaymentGateway } from "gheystack/payments/gateway";
+ *   import { PaymentGateway } from "stack/payments/gateway";
  *   const gateway = new PaymentGateway({ sellerAddress: "0x...", pricePerCall: 0.01, chain: "base" });
  *   app.use("/api/premium", gateway.middleware());
  *   app.get("/api/premium/data", gateway.paid(), (req, res) => res.json({ data: "value" }));

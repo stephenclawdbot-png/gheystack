@@ -14,12 +14,11 @@
 import {
   createWalletClient,
   http,
-  verifyMessage,
   hashMessage,
-  recoverAddress,
+  recoverMessageAddress,
   type LocalAccount,
 } from "viem";
-import { privateKeyToAccount, generatePrivateKey, addressFromPrivateKey } from "viem/accounts";
+import { privateKeyToAccount, generatePrivateKey } from "viem/accounts";
 import { base, mainnet, polygon, arbitrum } from "viem/chains";
 import type {
   AgentIdentity,
@@ -183,8 +182,8 @@ export class AgentIdentityManager {
     expectedSigner: `0x${string}`
   ): Promise<boolean> {
     try {
-      const recovered = await recoverAddress({
-        message: { raw: hashMessage(message) },
+      const recovered = await recoverMessageAddress({
+        message,
         signature,
       });
       return recovered.toLowerCase() === expectedSigner.toLowerCase();

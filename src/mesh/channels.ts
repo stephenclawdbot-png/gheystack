@@ -62,7 +62,7 @@ export class PaymentChannelManager {
    */
   async openChannel(
     counterparty: `0x${string}`,
-    myDeposit: number = this.config.defaultDeposit,
+    myDeposit: number = this.config.defaultDeposit ?? 10,
     counterpartyDeposit: number = 0
   ): Promise<PaymentChannel> {
     const channelId = this.computeChannelId(this.identity.address, counterparty);
@@ -91,7 +91,7 @@ export class PaymentChannelManager {
       sequence: 0,
       status: "open",
       openedBlock: 0, // would be set from on-chain event
-      challengePeriod: this.config.challengePeriod!,
+      challengePeriod: this.config.challengePeriod ?? 100,
     };
 
     this.channels.set(channelId, channel);

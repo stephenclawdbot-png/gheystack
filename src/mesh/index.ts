@@ -6,7 +6,7 @@
  * payment channels, an escrow service, and a task market connection.
  *
  * Usage:
- *   import { MeshNode } from "gheystack/mesh";
+ *   import { MeshNode } from "stack/mesh";
  *
  *   const node = await MeshNode.create({
  *     name: "WeatherAgent",

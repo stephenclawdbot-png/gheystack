@@ -58,9 +58,11 @@ async function callGroq(
       }))
     : undefined;
 
+  const groqMessages: any[] = messages.map((m) => ({ role: m.role, content: m.content }));
+
   const res = await client.chat.completions.create({
     model: model || "llama-3.3-70b-versatile",
-    messages: messages.map((m) => ({ role: m.role, content: m.content })),
+    messages: groqMessages,
     max_tokens: config.maxTokens ?? 500,
     temperature: config.temperature ?? 0.9,
     top_p: config.topP ?? 0.95,
@@ -98,9 +100,11 @@ async function callOpenAI(
       }))
     : undefined;
 
+  const openaiMessages: any[] = messages.map((m) => ({ role: m.role, content: m.content }));
+
   const res = await client.chat.completions.create({
     model: model || "gpt-4o",
-    messages: messages.map((m) => ({ role: m.role as any, content: m.content })),
+    messages: openaiMessages,
     max_tokens: config.maxTokens ?? 500,
     temperature: config.temperature ?? 0.9,
     tools: toolDefs,
@@ -125,6 +129,6 @@ async function callAnthropic(
 ): Promise<ProviderResponse> {
   // Anthropic uses a different SDK — lazy load
   // For now, route through OpenAI-compatible endpoint if available
-  console.warn("[gheystack] Anthropic provider not yet implemented. Using Groq fallback.");
+  console.warn("[stack] Anthropic provider not yet implemented. Using Groq fallback.");
   return callGroq(config, "llama-3.3-70b-versatile", messages, tools);
 }

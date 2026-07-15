@@ -11,7 +11,7 @@ export class Marketplace {
   /** Register a service for agents to discover */
   register(service: ServiceProvider): void {
     this.services.set(service.name, service);
-    console.log(`[gheystack] Service registered: ${service.name} (${service.pricePerCall} USDC/call)`);
+    console.log(`[stack] Service registered: ${service.name} (${service.pricePerCall} USDC/call)`);
   }
 
   /** List all available services */
@@ -47,7 +47,7 @@ export const marketplace = new Marketplace();
 marketplace.register({
   name: "weather-api",
   description: "Real-time weather data for any city",
-  endpoint: "https://api.gheystack.dev/weather",
+  endpoint: "https://api.stack.dev/weather",
   pricePerCall: 0.01,
   currency: "USDC",
 });
@@ -55,7 +55,7 @@ marketplace.register({
 marketplace.register({
   name: "token-price",
   description: "Live crypto token prices and charts",
-  endpoint: "https://api.gheystack.dev/price",
+  endpoint: "https://api.stack.dev/price",
   pricePerCall: 0.02,
   currency: "USDC",
 });
@@ -63,7 +63,7 @@ marketplace.register({
 marketplace.register({
   name: "contract-scanner",
   description: "Scan smart contracts for vulnerabilities",
-  endpoint: "https://api.gheystack.dev/scan",
+  endpoint: "https://api.stack.dev/scan",
   pricePerCall: 0.05,
   currency: "USDC",
 });

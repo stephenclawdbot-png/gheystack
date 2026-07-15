@@ -5,7 +5,7 @@
  * into a single cohesive interface that agents can use.
  *
  * Usage:
- *   import { AgentPayments } from "gheystack/payments/manager";
+ *   import { AgentPayments } from "stack/payments/manager";
  *
  *   const payments = new AgentPayments({
  *     privateKey: process.env.WALLET_PRIVATE_KEY as `0x${string}`,
@@ -60,7 +60,7 @@ export class AgentPayments {
 
     // For batch settlement, we need a recipient — use self for now
     // In production, the seller sets the recipient
-    console.log(`[gheystack] Payment wallet initialized: ${this.wallet.address} (${this.config.chain})`);
+    console.log(`[stack] Payment wallet initialized: ${this.wallet.address} (${this.config.chain})`);
   }
 
   /** Get USDC balance */
@@ -96,7 +96,7 @@ export class AgentPayments {
       recipient,
     });
     this.settlement.start();
-    console.log(`[gheystack] Batch settlement enabled (${mode} mode → ${recipient})`);
+    console.log(`[stack] Batch settlement enabled (${mode} mode → ${recipient})`);
   }
 
   /** Queue a micropayment for batch settlement */

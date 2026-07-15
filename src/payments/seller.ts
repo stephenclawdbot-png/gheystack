@@ -43,7 +43,7 @@ export class Seller {
       // Verify payment (in production: verify on-chain tx)
       try {
         const proof = JSON.parse(atob(payment));
-        console.log(`[gheystack] Payment received: ${proof.amount} USDC (tx: ${proof.txHash})`);
+        console.log(`[stack] Payment received: ${proof.amount} USDC (tx: ${proof.txHash})`);
 
         // Queue for batch settlement
         this.batcher.queue(this.config.pricePerCall, `${req.method} ${req.path}`);

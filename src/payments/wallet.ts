@@ -3,7 +3,7 @@
  * Supports Base, Ethereum, Polygon, Arbitrum
  *
  * Usage:
- *   import { createWallet } from "gheystack/payments/wallet";
+ *   import { createWallet } from "stack/payments/wallet";
  *   const wallet = await createWallet({ privateKey, chain: "base" });
  *   const bal = await wallet.balance();  // USDC balance
  *   const tx = await wallet.send("0x...", 5);  // Send 5 USDC
@@ -20,7 +20,7 @@ export interface WalletConfig {
 }
 
 interface ChainConfig {
-  chain: typeof base;
+  chain: typeof base | typeof mainnet | typeof polygon | typeof arbitrum;
   usdcAddress: `0x${string}`;
   usdcDecimals: number;
 }
@@ -113,7 +113,7 @@ export async function createWallet(config: WalletConfig): Promise<WalletHandle> 
         });
         return Number(formatUnits(result as bigint, decimals));
       } catch (e) {
-        console.warn(`[gheystack] Failed to read balance: ${e}`);
+        console.warn(`[stack] Failed to read balance: ${e}`);
         return 0;
       }
     },

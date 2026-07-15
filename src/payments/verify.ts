@@ -6,7 +6,7 @@
 import { createPublicClient, http, formatUnits, type Hash } from "viem";
 import { base, mainnet, polygon, arbitrum } from "viem/chains";
 
-const CHAIN_RPC: Record<string, typeof base> = {
+const CHAIN_RPC: Record<string, typeof base | typeof mainnet | typeof polygon | typeof arbitrum> = {
   base,
   ethereum: mainnet,
   polygon,

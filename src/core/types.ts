@@ -1,5 +1,5 @@
 /**
- * GheyStack — The Ghey Agent Stack
+ * stack — The Agent Stack
  * Core types and interfaces
  */
 

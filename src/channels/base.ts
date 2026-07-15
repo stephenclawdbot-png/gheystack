@@ -13,4 +13,4 @@ export function defineChannel(opts: {
 }
 
 export { TelegramChannel } from "./telegram.js";
-export { HTTPChannel } from "./http.js";
+export { defineHTTPChannel, startHTTPServer } from "./http.js";

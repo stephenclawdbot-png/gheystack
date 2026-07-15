@@ -92,7 +92,7 @@ export class TaskMarket {
       amount: params.bounty,
       durationSeconds: duration,
       arbiter: params.arbiter,
-      milestones: params.milestones,
+      milestones: params.milestones?.map(m => ({ description: m.description, amount: m.amount, released: false })),
     });
 
     const task: Task = {

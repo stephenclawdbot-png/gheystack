@@ -48,10 +48,10 @@ export function startHTTPServer(
       });
     } else {
       res.writeHead(200, { "Content-Type": "application/json" });
-      res.end(JSON.stringify({ status: "ok", service: "gheystack-agent" }));
+      res.end(JSON.stringify({ status: "ok", service: "stack-agent" }));
     }
   });
 
   server.listen(port);
-  console.log(`[gheystack] HTTP channel listening on :${port}`);
+  console.log(`[stack] HTTP channel listening on :${port}`);
 }

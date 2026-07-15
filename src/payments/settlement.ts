@@ -30,7 +30,7 @@ export interface SettlementConfig {
 export class SettlementService {
   private wallet: WalletHandle;
   private config: SettlementConfig;
-  private queue: PaymentRequest[] = [];
+  private pendingQueue: PaymentRequest[] = [];
   private timer: NodeJS.Timeout | null = null;
   private totalSettled: number = 0;
   private txCount: number = 0;
@@ -44,7 +44,7 @@ export class SettlementService {
   start(): void {
     if (this.config.mode === "time" && this.config.intervalSeconds) {
       this.timer = setInterval(() => this.settle(), this.config.intervalSeconds * 1000);
-      console.log(`[gheystack] Settlement service running (every ${this.config.intervalSeconds}s)`);
+      console.log(`[stack] Settlement service running (every ${this.config.intervalSeconds}s)`);
     }
   }
 
@@ -58,7 +58,7 @@ export class SettlementService {
 
   /** Queue a payment for settlement */
   queue(amount: number, memo?: string): void {
-    this.queue.push({
+    this.pendingQueue.push({
       amount,
       currency: "USDC",
       recipient: this.config.recipient,
@@ -68,36 +68,36 @@ export class SettlementService {
     // Auto-trigger based on mode
     if (this.config.mode === "amount" && this.pendingTotal() >= (this.config.amountThreshold ?? Infinity)) {
       this.settle();
-    } else if (this.config.mode === "count" && this.queue.length >= (this.config.countThreshold ?? Infinity)) {
+    } else if (this.config.mode === "count" && this.pendingQueue.length >= (this.config.countThreshold ?? Infinity)) {
       this.settle();
     }
   }
 
   /** Settle all queued payments in a single transaction */
   async settle(): Promise<string | null> {
-    if (this.queue.length === 0) return null;
+    if (this.pendingQueue.length === 0) return null;
 
     const total = this.pendingTotal();
-    console.log(`[gheystack] Settling ${this.queue.length} payments totaling ${total} USDC`);
+    console.log(`[stack] Settling ${this.pendingQueue.length} payments totaling ${total} USDC`);
 
     const txHash = await this.wallet.send(this.config.recipient, total);
 
     this.totalSettled += total;
-    this.txCount += this.queue.length;
-    this.queue = [];
+    this.txCount += this.pendingQueue.length;
+    this.pendingQueue = [];
 
-    console.log(`[gheystack] Settled. TX: ${txHash}`);
+    console.log(`[stack] Settled. TX: ${txHash}`);
     return txHash;
   }
 
   /** Get total pending USDC */
   pendingTotal(): number {
-    return this.queue.reduce((sum, p) => sum + p.amount, 0);
+    return this.pendingQueue.reduce((sum, p) => sum + p.amount, 0);
   }
 
   /** Get number of pending payments */
   pendingCount(): number {
-    return this.queue.length;
+    return this.pendingQueue.length;
   }
 
   /** Get lifetime stats */

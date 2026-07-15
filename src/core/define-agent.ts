@@ -1,5 +1,5 @@
 /**
- * defineAgent helper — like Eve's defineAgent but gheyer
+ * defineAgent helper — like Eve's defineAgent but simpler
  */
 
 import type { AgentConfig } from "./types.js";

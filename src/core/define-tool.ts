@@ -1,5 +1,5 @@
 /**
- * Tool definition helper — like Eve's defineTool but gheyer
+ * Tool definition helper — like Eve's defineTool but simpler
  */
 
 import type { ToolDef, AgentContext } from "./types.js";
